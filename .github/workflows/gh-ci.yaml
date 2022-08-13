@@ -45,7 +45,7 @@ jobs:
 
 
     - id: get-python-version
-      uses: MDAnalysis/get-latest-python-version@v0
+      uses: MDAnalysis/get-latest-python-version@main
       with:
         last-n-minor-release: ${{ matrix.last-n-minor-python-release }}
 
