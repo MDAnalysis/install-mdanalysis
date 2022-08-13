@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        last-n-minor-python-release: [2, 1, 0]
+        python-version: ["3.8", "3.9", "3.10"]
         installer: ["pip", "mamba"]
         include-tests: [true, false]
         mdanalysis-version:
@@ -30,7 +30,16 @@ jobs:
           - install-version: "2.1.0"
             expected-version: "2.1.0"
 
-            
+        - include:
+            - os: windows-latest
+              python-version: 3.9
+              installer: pip
+              include-tests: true
+            - os: macOS-latest
+              python-version: 3.10
+              installer: mamba
+              include-tests: false
+          
 
     steps:
     - uses: actions/checkout@v3
@@ -45,17 +54,11 @@ jobs:
 
         echo "USE_SHELL=${USE_SHELL}" >> $GITHUB_ENV
 
-
-    - id: get-python-version
-      uses: MDAnalysis/get-latest-python-version@main
-      with:
-        last-n-minor-release: ${{ matrix.last-n-minor-python-release }}
-
-    - name: Install conda Python ${{ steps.get-python-version.outputs.python-version }}
+    - name: Install conda Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'conda' }} || ${{ matrix.installer == 'mamba' }}
       uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: ${{ steps.get-python-version.outputs.python-version }}
+        python-version: ${{ matrix.python-version }}
         add-pip-as-python-dependency: true
         architecture: x64
         mamba-version: "*"
@@ -63,11 +66,11 @@ jobs:
         auto-update-conda: true
         show-channel-urls: true
 
-    - name: Setup Python ${{ steps.get-python-version.outputs.python-version }}
+    - name: Setup Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'pip' }}
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ steps.get-python-version.outputs.python-version }}
+        python-version: ${{ matrix.python-version }}
       
     - name: Check
       uses: ./.github/actions/check-mdanalysis-install
