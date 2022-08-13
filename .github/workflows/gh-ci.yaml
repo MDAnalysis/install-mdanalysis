@@ -11,7 +11,7 @@ on:
 
 defaults:
   run:
-    shell: bash
+    shell: bash -l {0}
 
 jobs:
   main-tests:
@@ -33,11 +33,11 @@ jobs:
         include:
           - os: windows-latest
             python-version: "3.9"
-            installer: pip
+            installer: mamba
             include-tests: true
           - os: macOS-latest
             python-version: "3.10"
-            installer: mamba
+            installer: pip
             include-tests: false
           
 
@@ -81,13 +81,11 @@ jobs:
         shell: ${{ env.USE_SHELL }}
     
     - name: Check version
-      shell: ${{ env.USE_SHELL }}
       run: |
         VERSION="'${{ matrix.mdanalysis-version['expected-version'] }}'"
         python -c "import MDAnalysis; assert MDAnalysis.__version__ == ${VERSION}"
 
     - name: Check MDAnalysisTests
       if: ${{ matrix.include-tests }}
-      shell: ${{ env.USE_SHELL }}
-      run:
+      run: |
         python -c "from MDAnalysis.tests.datafiles import PDB"
