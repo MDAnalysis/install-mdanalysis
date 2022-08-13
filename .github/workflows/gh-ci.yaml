@@ -72,10 +72,22 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
       
-    - name: Check
-      uses: ./.github/actions/check-mdanalysis-install
+    - id: Install
+      uses: ./
       with:
-        install-version: ${{ matrix.mdanalysis-version['install-version'] }}
-        include-tests: ${{ matrix.include-tests }}
+        version: ${{ matrix.mdanalysis-version['install-version'] }}
+        install-tests: ${{ matrix.include-tests }}
         installer: ${{ matrix.installer }}
         shell: ${{ env.USE_SHELL }}
+    
+    - name: Check version
+      shell: python
+      run: |
+        import MDAnalysis
+        assert MDAnalysis.__version__ == ${{ matrix.mdanalysis-version['expected-version'] }}
+    
+    - name: Check MDAnalysisTests
+      if: ${{ matrix.include-tests }}
+      shell: python
+      run:
+        from MDAnalysis.tests.datafiles import PDB
