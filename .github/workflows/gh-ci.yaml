@@ -148,6 +148,7 @@ jobs:
         with:
           python-version: ${{ needs.environment-config.outputs.stable-python-version }}
           environment-file: ./.github/workflows/test-environment.yaml
+          activate-environment: test
           add-pip-as-python-dependency: true
           architecture: x64
           mamba-version: "*"
