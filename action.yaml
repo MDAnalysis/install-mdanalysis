@@ -80,9 +80,9 @@ runs:
 
         # special case develop
         if [[ "${{ inputs.version }}" == "develop" ]] ; then
-          _INSTALL_LINE="git+https://github.com/MDAnalysis/mdanalysis@develop#egg=MDAnalysis&subdirectory=package"
+          _INSTALL_LINE="'git+https://github.com/MDAnalysis/mdanalysis@develop#egg=MDAnalysis&subdirectory=package'"
           if [[ "${{ inputs.install-tests }}" == "true" ]] ; then
-            _INSTALL_LINE="${_INSTALL_LINE} git+https://github.com/MDAnalysis/mdanalysis@develop#egg=MDAnalysisTests&subdirectory=testsuite"
+            _INSTALL_LINE="${_INSTALL_LINE} 'git+https://github.com/MDAnalysis/mdanalysis@develop#egg=MDAnalysisTests&subdirectory=testsuite'"
           fi
         fi
 
