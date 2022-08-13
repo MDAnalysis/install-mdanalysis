@@ -47,8 +47,8 @@ runs:
       id: setup-installer
       shell: ${{ inputs.shell }}
       run: |
-        case "${{ inputs.installer }}" in
-            "pip"|"conda"|"mamba") true ;;
+        case ${{ inputs.installer }} in
+            pip|conda|mamba) true ;;
             *)
               printf "${{ inputs.installer }} is not a valid installer; must be one of pip, conda, mamba"
               exit 1
@@ -56,7 +56,7 @@ runs:
         esac
 
         INSTALLER="${{ inputs.installer }}"
-        if [[ "${{ inputs.version }}" == "develop" ]] ; then
+        if [[ ${{ inputs.version }} == "develop" ]] ; then
           INSTALLER="pip"
         fi
 

@@ -35,10 +35,17 @@ jobs:
             python-version: "3.9"
             installer: mamba
             include-tests: true
+            mdanalysis-version:
+              install-version: "2.0.0"
+              expected-version: "2.0.0"
+
           - os: macOS-latest
             python-version: "3.10"
             installer: pip
             include-tests: false
+            mdanalysis-version:
+              install-version: "2.1.0"
+              expected-version: "2.1.0"
           
 
     steps:
