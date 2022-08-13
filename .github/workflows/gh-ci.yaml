@@ -84,7 +84,7 @@ jobs:
       shell: python
       run: |
         import MDAnalysis
-        assert MDAnalysis.__version__ == ${{ matrix.mdanalysis-version['expected-version'] }}
+        assert MDAnalysis.__version__ == "${{ matrix.mdanalysis-version['expected-version'] }}"
     
     - name: Check MDAnalysisTests
       if: ${{ matrix.include-tests }}
