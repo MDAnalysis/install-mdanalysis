@@ -106,7 +106,7 @@ jobs:
       run: |
         case "${{ matrix.mdanalysis-version }}"  in 
           "develop") VERSION="'${MDANALYSIS_DEVELOP_VERSION}'" ;;
-          "latest") VERSION="'${MDANALYSIS_LATEST_RELEASE} '";;
+          "latest") VERSION="'${MDANALYSIS_LATEST_RELEASE}'";;
           "previous") VERSION="'${MDANALYSIS_PREVIOUS_RELEASE}'" ;;
           *) VERSION="'${{ matrix.mdanalysis-version }}'" ;;
         esac
