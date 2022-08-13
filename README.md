@@ -74,3 +74,8 @@ steps:
 * install-tests: `true` or `false`. Whether or not to install MDAnalysisTests
 * installer: this can be "conda", "mamba", or "pip". The conda environments and Python should already be set up prior to installing.
 * shell: We highly recommend using the login shell `"bash -l {0}"` if you are using a conda environment, and `"bash"` otherwise.
+
+
+### Notes:
+
+* Cycling this action while using `pip` and `conda` to repeatedly uninstall or reinstall MDAnalysis may lead to undefined behaviour. It is highly encouraged to keep Python environments separate between jobs to avoid this kind of issue.
