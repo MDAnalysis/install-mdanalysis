@@ -27,8 +27,10 @@ jobs:
             expected-version: "2.3.0-dev0"
           - install-version: latest
             expected-version: "2.2.0"
-          - install-version: "2.0.0"
-            expected-version: "2.0.0"
+          - install-version: "2.1.0"
+            expected-version: "2.1.0"
+
+            
 
     steps:
     - uses: actions/checkout@v3
