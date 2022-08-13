@@ -104,17 +104,19 @@ jobs:
     
     - name: Check version
       run: |
-        case ${{ matrix.mdanalysis-version }}  in 
+        case "${{ matrix.mdanalysis-version }}"  in 
           "develop") VERSION="'${MDANALYSIS_DEVELOP_VERSION}'" ;;
           "latest") VERSION="'${MDANALYSIS_LATEST_RELEASE} '";;
           "previous") VERSION="'${MDANALYSIS_PREVIOUS_RELEASE}'" ;;
           *) VERSION="'${{ matrix.mdanalysis-version }}'" ;;
         esac
 
-        python -c "import MDAnalysis; assert MDAnalysis.__version__ == ${VERSION}"
+        echo "Expecting version $VERSION for installed version ${{ steps.environment-setup.outputs.action-install-version }} "
+
+        python -c "import MDAnalysis; assert MDAnalysis.__version__ == ${VERSION}, f'incorrect version {MDAnalysis.__version__}'"
 
         if [[ "${{ matrix.include-tests }}" == "true" ]] ; then
-          python -c "import MDAnalysisTests; assert MDAnalysisTests.__version__ == ${VERSION}"
+          python -c "import MDAnalysisTests; assert MDAnalysisTests.__version__ == ${VERSION}, f'incorrect test version {MDAnalysis.__version__}'"
 
         else
           if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; then
