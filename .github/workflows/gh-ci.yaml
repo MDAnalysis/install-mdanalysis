@@ -44,10 +44,10 @@ jobs:
         echo "USE_SHELL=${USE_SHELL}" >> $GITHUB_ENV
 
 
-    - id: get-python-version
-      uses: MDAnalysis/get-latest-python-version
-      with:
-        last-n-minor-release: ${{ matrix.last-n-minor-python-release }}
+    # - id: get-python-version
+    #   uses: MDAnalysis/get-latest-python-version
+    #   with:
+    #     last-n-minor-release: ${{ matrix.last-n-minor-python-release }}
 
     - name: Install conda Python ${{ steps.get-python-version.outputs.python-version }}
       if: ${{ matrix.installer == 'conda' }} || ${{ matrix.installer == 'mamba' }}
