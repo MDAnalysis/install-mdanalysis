@@ -1,0 +1,76 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  main-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        last-n-minor-python-release: [2, 1, 0]
+        installer: ["pip", "mamba"]
+        include-tests: [true, false]
+        mdanalysis-version:
+          - install-version: develop
+            expected-version: "2.3.0-dev0"
+          - install-version: latest
+            expected-version: "2.2.0"
+          - install-version: "2.0.0"
+            expected-version: "2.0.0"
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up environment
+      run: |
+        if [[ ${{ matrix.installer }} == 'pip' ]] ; then
+          USE_SHELL="bash"
+        else
+          USE_SHELL="bash -l {0}"
+        fi
+
+        echo "USE_SHELL=${USE_SHELL}" >> $GITHUB_ENV
+
+
+    - id: get-python-version
+      uses: MDAnalysis/get-latest-python-version
+      with:
+        last-n-minor-release: ${{ matrix.last-n-minor-python-release }}
+
+    - name: Install conda Python ${{ steps.get-python-version.outputs.python-version }}
+      if: ${{ matrix.installer == 'conda' }} || ${{ matrix.installer == 'mamba' }}
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        python-version: ${{ steps.get-python-version.outputs.python-version }}
+        add-pip-as-python-dependency: true
+        architecture: x64
+        mamba-version: "*"
+        channels: conda-forge, defaults
+        auto-update-conda: true
+        show-channel-urls: true
+
+    - name: Setup Python ${{ steps.get-python-version.outputs.python-version }}
+      if: ${{ matrix.installer == 'pip' }}
+      uses: actions/setup-python@v3
+        with:
+          python-version: ${{ steps.get-python-version.outputs.python-version }}
+      
+    - name: Check
+      uses: ./.github/actions/check-mdanalysis-install
+      with:
+        install-version: ${{ matrix.mdanalysis-version['install-version'] }}
+        include-tests: ${{ matrix.include-tests }}
+        installer: ${{ matrix.installer }}
+        shell: ${{ env.USE_SHELL }}
