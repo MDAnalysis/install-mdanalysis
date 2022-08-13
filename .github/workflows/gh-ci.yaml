@@ -81,13 +81,13 @@ jobs:
         shell: ${{ env.USE_SHELL }}
     
     - name: Check version
-      shell: python
+      shell: ${{ env.USE_SHELL }}
       run: |
-        import MDAnalysis
-        assert MDAnalysis.__version__ == "${{ matrix.mdanalysis-version['expected-version'] }}"
-    
+        VERSION="'${{ matrix.mdanalysis-version['expected-version'] }}'"
+        python -c "import MDAnalysis; assert MDAnalysis.__version__ == ${VERSION}"
+
     - name: Check MDAnalysisTests
       if: ${{ matrix.include-tests }}
-      shell: python
+      shell: ${{ env.USE_SHELL }}
       run:
-        from MDAnalysis.tests.datafiles import PDB
+        python -c "from MDAnalysis.tests.datafiles import PDB"
