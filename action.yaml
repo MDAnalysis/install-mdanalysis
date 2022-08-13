@@ -36,18 +36,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Uninstall pre-existing versions
-      shell: ${{ inputs.shell }}
-      run: |
-        # uninstall tests even if not reinstalling,
-        # as versions can clash
-        # we may need to continuously re-uninstall if there are multiple versions
-        # also, match ^MDAnalysis with space, to avoid matching stuff like MDAnalysisData
-        while [[ $(python -m pip list | grep "^MDAnalysis ") ]] ; do
-          python -m pip uninstall -y MDAnalysis MDAnalysisTests
-        done
-        
-
     - name: Set installer
       id: setup-installer
       shell: ${{ inputs.shell }}
@@ -67,6 +55,20 @@ runs:
 
         echo "::set-output name=installer::$(echo $INSTALLER)"
 
+    - name: Uninstall pre-existing versions
+      shell: ${{ inputs.shell }}
+      run: |
+        # uninstall tests even if not reinstalling,
+        # as versions can clash
+        # we may need to continuously re-uninstall if there are multiple versions
+        # also, match ^MDAnalysis with space, to avoid matching stuff like MDAnalysisData
+
+        conda remove --force mdanalysis --yes || true
+        conda remove --force mdanalysistests --yes || true
+
+        while [[ $(python -m pip list | grep "^MDAnalysis ") ]] ; do
+          python -m pip uninstall -y MDAnalysis MDAnalysisTests
+        done
 
     - name: Setup install lines
       id: setup-install-line
