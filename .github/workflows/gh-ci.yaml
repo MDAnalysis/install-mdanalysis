@@ -39,30 +39,20 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
         installer: ["pip", "mamba"]
         include-tests: [true, false]
-        mdanalysis-version:
-          - install-version: develop
-            expected-version: ${{ env.MDANALYSIS_DEVELOP_VERSION }}
-          - install-version: latest
-            expected-version: ${{ env.MDANALYSIS_LATEST_RELEASE }}
-          - install-version: "2.1.0"
-            expected-version: ${{ env.MDANALYSIS_PREVIOUS_RELEASE }}
+        mdanalysis-version: ["develop", "latest", "previous"]
 
         include:
           - os: windows-latest
             python-version: "3.10"
             installer: conda
             include-tests: true
-            mdanalysis-version:
-              install-version: ${{ env.MDANALYSIS_LATEST_RELEASE }}
-              expected-version: ${{ env.MDANALYSIS_LATEST_RELEASE }}
+            mdanalysis-version: "latest"
 
           - os: macOS-latest
             python-version: "3.10"
             installer: conda
             include-tests: false
-            mdanalysis-version:
-              install-version: ${{ env.MDANALYSIS_LATEST_RELEASE }}
-              expected-version: ${{ env.MDANALYSIS_LATEST_RELEASE }}
+            mdanalysis-version: "latest"
 
     steps:
     - uses: actions/checkout@v3
@@ -98,14 +88,20 @@ jobs:
     - id: Install
       uses: ./
       with:
-        version: ${{ matrix.mdanalysis-version['install-version'] }}
+        version: ${{ matrix.mdanalysis-version }}
         install-tests: ${{ matrix.include-tests }}
         installer: ${{ matrix.installer }}
         shell: ${{ env.USE_SHELL }}
     
     - name: Check version
       run: |
-        VERSION="'${{ matrix.mdanalysis-version['expected-version'] }}'"
+        case ${{ matrix.mdanalysis-version }}  in 
+          "develop") VERSION="'${MDANALYSIS_DEVELOP_VERSION}'" ;;
+          "latest") VERSION="'${MDANALYSIS_LATEST_RELEASE} '";;
+          "previous") VERSION="'${MDANALYSIS_PREVIOUS_RELEASE}'" ;;
+          *) VERSION="'${{ matrix.mdanalysis-version }}'" ;;
+        esac
+
         python -c "import MDAnalysis; assert MDAnalysis.__version__ == ${VERSION}"
 
         if [[ "${{ matrix.include-tests }}" == "true" ]] ; do
