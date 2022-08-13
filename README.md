@@ -63,3 +63,14 @@ steps:
     echo "MDAnalysis version: ${{ steps.install-mdanalysis.outputs.installed-version }}
 
 ```
+
+
+### Options
+
+* version: this can be
+  * "develop": this will pull the develop branch from GitHub
+  * "latest": this will install the most recent release
+  * "2.0.0" or a similar release number
+* install-tests: `true` or `false`. Whether or not to install MDAnalysisTests
+* installer: this can be "conda", "mamba", or "pip". The conda environments and Python should already be set up prior to installing.
+* shell: We highly recommend using the login shell `"bash -l {0}"` if you are using a conda environment, and `"bash"` otherwise.

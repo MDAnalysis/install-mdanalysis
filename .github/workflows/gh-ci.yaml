@@ -9,6 +9,12 @@ on:
     paths-ignore:
       - '**.md'
 
+concurrency:
+  # Specific group naming so CI is only cancelled
+  # within same PR or on merge to main
+  group: "${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}"
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash -l {0}
@@ -46,7 +52,6 @@ jobs:
             mdanalysis-version:
               install-version: "2.1.0"
               expected-version: "2.1.0"
-          
 
     steps:
     - uses: actions/checkout@v3
