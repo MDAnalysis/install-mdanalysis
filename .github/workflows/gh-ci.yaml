@@ -64,8 +64,8 @@ jobs:
     - name: Setup Python ${{ steps.get-python-version.outputs.python-version }}
       if: ${{ matrix.installer == 'pip' }}
       uses: actions/setup-python@v3
-        with:
-          python-version: ${{ steps.get-python-version.outputs.python-version }}
+      with:
+        python-version: ${{ steps.get-python-version.outputs.python-version }}
       
     - name: Check
       uses: ./.github/actions/check-mdanalysis-install
