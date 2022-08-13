@@ -57,7 +57,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up environment
+    - id: environment-setup
       run: |
         if [[ ${{ matrix.installer }} == 'pip' ]] ; then
           USE_SHELL="bash"
@@ -65,7 +65,16 @@ jobs:
           USE_SHELL="bash -l {0}"
         fi
 
-        echo "USE_SHELL=${USE_SHELL}" >> $GITHUB_ENV
+        echo "::set-output name=action-shell::$(echo $USE_SHELL)"
+
+        if [[ ${{ matrix.mdanalysis-version }} == 'previous' ]] ; then
+          INSTALL_VERSION=${MDANALYSIS_PREVIOUS_RELEASE}
+        else
+          INSTALL_VERSION=${{ matrix.mdanalysis-version }}
+        fi
+
+        echo "::set-output name=action-install-version::$(echo $INSTALL_VERSION)"
+
 
     - name: Install conda Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'conda' || matrix.installer == 'mamba' }}
@@ -88,10 +97,10 @@ jobs:
     - id: Install
       uses: ./
       with:
-        version: ${{ matrix.mdanalysis-version }}
+        version: ${{ steps.environment-setup.outputs.action-install-version }}
         install-tests: ${{ matrix.include-tests }}
         installer: ${{ matrix.installer }}
-        shell: ${{ env.USE_SHELL }}
+        shell: ${{ steps.environment-setup.outputs.action-shell }}
     
     - name: Check version
       run: |
