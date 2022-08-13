@@ -1,6 +1,6 @@
 name: test
 channels:
-  - conda-forge {% endif %}
+  - conda-forge
   - defaults
 dependencies:
     # Base depends
