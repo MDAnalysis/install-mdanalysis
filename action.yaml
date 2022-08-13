@@ -106,7 +106,7 @@ runs:
         python -m pip install ${{ steps.setup-install-line.outputs.install-line }}
 
         if [[ ${{ inputs.version }} == "latest" ]] ; then
-          python -m pip upgrade ${{ steps.setup-install-line.outputs.install-line }}
+          python -m pip install --upgrade ${{ steps.setup-install-line.outputs.install-line }}
         fi
 
     - name: Get final version
