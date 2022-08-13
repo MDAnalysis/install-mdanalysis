@@ -120,8 +120,8 @@ jobs:
           if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; then
             echo "MDAnalysisTests is installed even though it shouldn't be!"
             exit 1
-          done
-        done
+          fi
+        fi
 
   environment-config:
     runs-on: ubuntu-latest
@@ -168,7 +168,7 @@ jobs:
           if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; then
             echo "MDAnalysisTests is installed even though it shouldn't be!"
             exit 1
-          done
+          fi
 
   test-on-preinstalled-pip:
     needs: environment-config
