@@ -113,11 +113,11 @@ jobs:
 
         python -c "import MDAnalysis; assert MDAnalysis.__version__ == ${VERSION}"
 
-        if [[ "${{ matrix.include-tests }}" == "true" ]] ; do
+        if [[ "${{ matrix.include-tests }}" == "true" ]] ; then
           python -c "import MDAnalysisTests; assert MDAnalysisTests.__version__ == ${VERSION}"
 
         else
-          if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; do
+          if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; then
             echo "MDAnalysisTests is installed even though it shouldn't be!"
             exit 1
           done
@@ -165,7 +165,7 @@ jobs:
       - name: Check version
         run: |
           python -c "import MDAnalysis; assert MDAnalysis.__version__ == '${{ env.MDANALYSIS_PREVIOUS_RELEASE }}'"
-          if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; do
+          if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; then
             echo "MDAnalysisTests is installed even though it shouldn't be!"
             exit 1
           done
