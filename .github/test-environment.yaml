@@ -1,0 +1,12 @@
+name: test
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+    # Base depends
+  - python
+  - pip
+
+    # MDAnalysis
+  - MDAnalysis
+  - MDAnalysisTests

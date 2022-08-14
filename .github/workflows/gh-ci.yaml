@@ -1,0 +1,206 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  schedule:
+    # Weekly tests at midnight on Sundays run on main by default:
+    #   Scheduled workflows run on the latest commit on the default or base branch.
+    #   (from https://help.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule)
+    - cron: "0 0 * * 0"
+
+
+concurrency:
+  # Specific group naming so CI is only cancelled
+  # within same PR or on merge to main
+  group: "${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}"
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+env:
+  MDANALYSIS_DEVELOP_VERSION: "2.3.0-dev0"
+  MDANALYSIS_LATEST_RELEASE: "2.2.0"
+  MDANALYSIS_PREVIOUS_RELEASE: "2.1.0"
+
+jobs:
+  main-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8", "3.9", "3.10"]
+        installer: ["pip", "mamba"]
+        include-tests: [true, false]
+        mdanalysis-version: ["develop", "latest", "previous"]
+
+        include:
+          - os: windows-latest
+            python-version: "3.10"
+            installer: conda
+            include-tests: true
+            mdanalysis-version: "latest"
+
+          - os: macOS-latest
+            python-version: "3.10"
+            installer: conda
+            include-tests: false
+            mdanalysis-version: "latest"
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - id: environment-setup
+      run: |
+        if [[ ${{ matrix.installer }} == 'pip' ]] ; then
+          USE_SHELL="bash"
+        else
+          USE_SHELL="bash -l {0}"
+        fi
+
+        echo "::set-output name=action-shell::$(echo $USE_SHELL)"
+
+        if [[ ${{ matrix.mdanalysis-version }} == 'previous' ]] ; then
+          INSTALL_VERSION=${MDANALYSIS_PREVIOUS_RELEASE}
+        else
+          INSTALL_VERSION=${{ matrix.mdanalysis-version }}
+        fi
+
+        echo "::set-output name=action-install-version::$(echo $INSTALL_VERSION)"
+
+
+    - name: Install conda Python ${{ matrix.python-version }}
+      if: ${{ matrix.installer == 'conda' || matrix.installer == 'mamba' }}
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        add-pip-as-python-dependency: true
+        architecture: x64
+        mamba-version: "*"
+        channels: conda-forge, defaults
+        auto-update-conda: true
+        show-channel-urls: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      if: ${{ matrix.installer == 'pip' }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+      
+    - id: Install
+      uses: ./
+      with:
+        version: ${{ steps.environment-setup.outputs.action-install-version }}
+        install-tests: ${{ matrix.include-tests }}
+        installer: ${{ matrix.installer }}
+        shell: ${{ steps.environment-setup.outputs.action-shell }}
+    
+    - name: Check version
+      run: |
+        case "${{ matrix.mdanalysis-version }}"  in 
+          "develop") VERSION="'${MDANALYSIS_DEVELOP_VERSION}'" ;;
+          "latest") VERSION="'${MDANALYSIS_LATEST_RELEASE}'";;
+          "previous") VERSION="'${MDANALYSIS_PREVIOUS_RELEASE}'" ;;
+          *) VERSION="'${{ matrix.mdanalysis-version }}'" ;;
+        esac
+
+        echo "Expecting version $VERSION for installed version ${{ steps.environment-setup.outputs.action-install-version }} "
+
+        python -c "import MDAnalysis; assert MDAnalysis.__version__ == ${VERSION}, f'incorrect version {MDAnalysis.__version__}'"
+
+        if [[ "${{ matrix.include-tests }}" == "true" ]] ; then
+          python -c "import MDAnalysisTests; assert MDAnalysisTests.__version__ == ${VERSION}, f'incorrect test version {MDAnalysis.__version__}'"
+
+        else
+          if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; then
+            echo "MDAnalysisTests is installed even though it shouldn't be!"
+            exit 1
+          fi
+        fi
+
+  environment-config:
+    runs-on: ubuntu-latest
+    outputs:
+      stable-python-version: "${{ steps.get-python-version.outputs.python-version }}"
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: get-python-version
+        uses: MDAnalysis/get-latest-python-version@main
+        with:
+          last-n-minor-release: 1
+
+  test-on-preinstalled-conda:
+    needs: environment-config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install conda ${{ needs.environment-config.outputs.stable-python-version }}
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ needs.environment-config.outputs.stable-python-version }}
+          environment-file: ./.github/test-environment.yaml
+          activate-environment: test
+          add-pip-as-python-dependency: true
+          architecture: x64
+          mamba-version: "*"
+          channels: conda-forge, defaults
+          auto-update-conda: true
+          show-channel-urls: true
+      
+
+      - name: Install
+        uses: ./
+        with:
+          version: ${{ env.MDANALYSIS_PREVIOUS_RELEASE }}
+          install-tests: false
+          installer: mamba
+          shell: bash -l {0}
+        
+      - name: Check version
+        run: |
+          python -c "import MDAnalysis; assert MDAnalysis.__version__ == '${{ env.MDANALYSIS_PREVIOUS_RELEASE }}'"
+          if [[ $(python -m pip list | grep "^MDAnalysisTests ") ]] ; then
+            echo "MDAnalysisTests is installed even though it shouldn't be!"
+            exit 1
+          fi
+
+  test-on-preinstalled-pip:
+    needs: environment-config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python ${{ needs.environment-config.outputs.stable-python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ needs.environment-config.outputs.stable-python-version }}
+
+      - name: Install MDAnalysis
+        shell: bash
+        run: |
+          # fun with versions
+          python -m pip install MDAnalysis==${{ env.MDANALYSIS_PREVIOUS_RELEASE }} MDAnalysisTests==${{ env.MDANALYSIS_PREVIOUS_RELEASE }}
+          python -m pip install MDAnalysis==${{ env.MDANALYSIS_LATEST_RELEASE }} MDAnalysisTests==${{ env.MDANALYSIS_LATEST_RELEASE }}
+          python -m pip install MDAnalysis==${{ env.MDANALYSIS_PREVIOUS_RELEASE }} MDAnalysisTests==${{ env.MDANALYSIS_PREVIOUS_RELEASE }}
+
+      - name: Install
+        uses: ./
+        with:
+          version: develop
+          install-tests: true
+          installer: pip
+          shell: bash
+        
+      - name: Check version
+        run: |
+          python -c "import MDAnalysis; assert MDAnalysis.__version__ == '${{ env.MDANALYSIS_DEVELOP_VERSION }}'"
+          python -c "import MDAnalysisTests; assert MDAnalysisTests.__version__ == '${{ env.MDANALYSIS_DEVELOP_VERSION }}'"
