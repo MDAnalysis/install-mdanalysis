@@ -26,9 +26,9 @@ defaults:
     shell: bash -l {0}
 
 env:
-  MDANALYSIS_DEVELOP_VERSION: "2.3.0-dev0"
-  MDANALYSIS_LATEST_RELEASE: "2.2.0"
-  MDANALYSIS_PREVIOUS_RELEASE: "2.1.0"
+  MDANALYSIS_DEVELOP_VERSION: "2.5.0-dev0"
+  MDANALYSIS_LATEST_RELEASE: "2.4.2"
+  MDANALYSIS_PREVIOUS_RELEASE: "2.3.0"
 
 jobs:
   main-tests:
@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.11"]
         installer: ["pip", "mamba"]
         include-tests: [true, false]
         mdanalysis-version: ["develop", "latest", "previous"]
@@ -65,7 +65,7 @@ jobs:
           USE_SHELL="bash -l {0}"
         fi
 
-        echo "::set-output name=action-shell::$(echo $USE_SHELL)"
+        echo "action-shell=${USE_SHELL}" >> $GITHUB_OUTPUT
 
         if [[ ${{ matrix.mdanalysis-version }} == 'previous' ]] ; then
           INSTALL_VERSION=${MDANALYSIS_PREVIOUS_RELEASE}
@@ -73,7 +73,7 @@ jobs:
           INSTALL_VERSION=${{ matrix.mdanalysis-version }}
         fi
 
-        echo "::set-output name=action-install-version::$(echo $INSTALL_VERSION)"
+        echo "action-install-version=${INSTALL_VERSION}" >> $GITHUB_OUTPUT
 
 
     - name: Install conda Python ${{ matrix.python-version }}
