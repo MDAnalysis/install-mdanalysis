@@ -36,10 +36,17 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         installer: ["pip", "mamba"]
         include-tests: [true, false]
         mdanalysis-version: ["develop", "latest", "previous"]
+
+        exclude:
+          - python-version: "3.11"
+            mdanalysis-version: "previous"
+
+          - python-version: "3.8"
+            mdanalysis-version: "develop"
 
         include:
           - os: windows-latest
