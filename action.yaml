@@ -53,7 +53,7 @@ runs:
           INSTALLER="pip"
         fi
 
-        echo "::set-output name=installer::$(echo $INSTALLER)"
+        echo "installer=${INSTALLER}" >> $GITHUB_OUTPUT
 
     - name: Uninstall pre-existing versions
       shell: ${{ inputs.shell }}
@@ -94,7 +94,7 @@ runs:
         fi
 
         echo "Install line: ${_INSTALL_LINE}"
-        echo "::set-output name=install-line::$(echo $_INSTALL_LINE)"
+        echo "install-line=${_INSTALL_LINE}" >> $GITHUB_OUTPUT
     
     - name: Install with conda
       if: steps.setup-installer.outputs.installer != 'pip'
@@ -112,4 +112,4 @@ runs:
       shell: ${{ inputs.shell }}
       run: |
         pyver=$(python -c 'import MDAnalysis; print(MDAnalysis.__version__)')
-        echo "::set-output name=installed-version::$(echo $pyver)"
+        echo "installed-version=${pyver}" >> $GITHUB_OUTPUT
