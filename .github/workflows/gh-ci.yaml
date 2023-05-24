@@ -82,25 +82,23 @@ jobs:
 
         echo "action-install-version=${INSTALL_VERSION}" >> $GITHUB_OUTPUT
 
-
-    - name: Install conda Python ${{ matrix.python-version }}
+    - name: Install mamba Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'conda' || matrix.installer == 'mamba' }}
-      uses: conda-incubator/setup-miniconda@v2
+      uses: mamba-org/provision-with-micromamba@main
       with:
-        python-version: ${{ matrix.python-version }}
-        add-pip-as-python-dependency: true
-        architecture: x64
-        mamba-version: "*"
-        channels: conda-forge, defaults
-        auto-update-conda: true
-        show-channel-urls: true
+        environment-file: False
+        environment-name: mda
+        extra-specs: |
+          python==${{ matrix.python-version }}
+          pip
+        channels: conda-forge
 
     - name: Setup Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'pip' }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-      
+
     - id: Install
       uses: ./
       with:
@@ -108,7 +106,7 @@ jobs:
         install-tests: ${{ matrix.include-tests }}
         installer: ${{ matrix.installer }}
         shell: ${{ steps.environment-setup.outputs.action-shell }}
-    
+
     - name: Check version
       run: |
         case "${{ matrix.mdanalysis-version }}"  in 
@@ -137,8 +135,6 @@ jobs:
     outputs:
       stable-python-version: "${{ steps.get-python-version.outputs.python-version }}"
     steps:
-      - uses: actions/checkout@v3
-
       - id: get-python-version
         uses: MDAnalysis/get-latest-python-version@main
         with:
@@ -150,19 +146,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install conda ${{ needs.environment-config.outputs.stable-python-version }}
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install mamba Python ${{ needs.environment-config.outputs.stable-python-version }}
+        if: ${{ matrix.installer == 'conda' || matrix.installer == 'mamba' }}
+        uses: mamba-org/provision-with-micromamba@main
         with:
-          python-version: ${{ needs.environment-config.outputs.stable-python-version }}
           environment-file: ./.github/test-environment.yaml
-          activate-environment: test
-          add-pip-as-python-dependency: true
-          architecture: x64
-          mamba-version: "*"
-          channels: conda-forge, defaults
-          auto-update-conda: true
-          show-channel-urls: true
-      
+          environment-name: mda
+          extra-specs: |
+            python==${{ needs.environment-config.outputs.stable-python-version }}
+            pip
+          channels: conda-forge
 
       - name: Install
         uses: ./
