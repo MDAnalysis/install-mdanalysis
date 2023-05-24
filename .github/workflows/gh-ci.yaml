@@ -37,7 +37,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.9", "3.10", "3.11"]
-        installer: ["pip", "mamba"]
+        installer: ["pip", "micromamba"]
         include-tests: [true, false]
         mdanalysis-version: ["develop", "latest", "previous"]
 
@@ -83,7 +83,7 @@ jobs:
         echo "action-install-version=${INSTALL_VERSION}" >> $GITHUB_OUTPUT
 
     - name: Install mamba Python ${{ matrix.python-version }}
-      if: ${{ matrix.installer == 'conda' || matrix.installer == 'mamba' }}
+      if: ${{ matrix.installer == 'conda' || matrix.installer == 'micromamba' }}
       uses: mamba-org/provision-with-micromamba@main
       with:
         environment-file: False
