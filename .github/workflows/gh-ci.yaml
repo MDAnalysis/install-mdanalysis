@@ -162,7 +162,7 @@ jobs:
         with:
           version: ${{ env.MDANALYSIS_PREVIOUS_RELEASE }}
           install-tests: false
-          installer: mamba
+          installer: micromamba
           shell: bash -l {0}
         
       - name: Check version
