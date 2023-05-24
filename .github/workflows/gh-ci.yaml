@@ -58,21 +58,21 @@ jobs:
         mdanalysis-version: ["develop", "latest", "previous"]
 
         exclude:
-          - python-version: ${{ needs.gen-python-matrix.latest-python }}
+          - python-version: "${{ needs.gen-python-matrix.latest-python }}"
             mdanalysis-version: "previous"
 
-          - python-version: ${{ needs.gen-python-matrix.oldest-python }}
+          - python-version: "${{ needs.gen-python-matrix.oldest-python }}"
             mdanalysis-version: "develop"
 
         include:
           - os: windows-latest
-            python-version: ${{ needs.gen-python-matrix.stable-python }}
+            python-version: "${{ needs.gen-python-matrix.stable-python }}"
             installer: conda
             include-tests: true
             mdanalysis-version: "latest"
 
           - os: macOS-latest
-            python-version: ${{ needs.gen-python-matrix.stable-python }}
+            python-version: "${{ needs.gen-python-matrix.stable-python }}"
             installer: conda
             include-tests: false
             mdanalysis-version: "latest"
