@@ -15,7 +15,7 @@ inputs:
   installer:
     description: >
       Installer to use.
-      Must be one of pip, conda, or mamba.
+      Must be one of pip, conda, mamba, or micromamba.
     required: true
     default: pip
   shell:
@@ -41,9 +41,9 @@ runs:
       shell: ${{ inputs.shell }}
       run: |
         case ${{ inputs.installer }} in
-            pip|conda|mamba) true ;;
+            pip|conda|mamba|micromamba) true ;;
             *)
-              printf "${{ inputs.installer }} is not a valid installer; must be one of pip, conda, mamba"
+              printf "${{ inputs.installer }} is not a valid installer; must be one of pip, conda, mamba, micromamba"
               exit 1
               ;;
         esac

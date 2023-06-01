@@ -31,32 +31,48 @@ env:
   MDANALYSIS_PREVIOUS_RELEASE: "2.4.3"
 
 jobs:
+  gen-python-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      python-matrix: ${{ steps.get-compatible-python.outputs.python-versions }}
+      latest-python: ${{ steps.get-compatible-python.outputs.latest-python }}
+      oldest-python: ${{ steps.get-compatible-python.outputs.oldest-python }}
+      stable-python: ${{ steps.get-compatible-python.outputs.stable-python }}
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - id: get-compatible-python
+        uses: MDAnalysis/mdanalysis-compatible-python@main
+
   main-tests:
     runs-on: ${{ matrix.os }}
+    needs: gen-python-matrix
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11"]
-        installer: ["pip", "mamba"]
+        python-version: ${{ fromJSON(needs.gen-python-matrix.outputs.python-matrix) }}
+        installer: ["pip", "micromamba"]
         include-tests: [true, false]
         mdanalysis-version: ["develop", "latest", "previous"]
 
         exclude:
-          - python-version: "3.11"
+          - python-version: "${{ needs.gen-python-matrix.outputs.latest-python }}"
             mdanalysis-version: "previous"
 
-          - python-version: "3.8"
+          - python-version: "${{ needs.gen-python-matrix.outputs.oldest-python }}"
             mdanalysis-version: "develop"
 
         include:
           - os: windows-latest
-            python-version: "3.10"
+            python-version: "${{ needs.gen-python-matrix.outputs.stable-python }}"
             installer: conda
             include-tests: true
             mdanalysis-version: "latest"
 
           - os: macOS-latest
-            python-version: "3.10"
+            python-version: "${{ needs.gen-python-matrix.outputs.stable-python }}"
             installer: conda
             include-tests: false
             mdanalysis-version: "latest"
@@ -82,9 +98,19 @@ jobs:
 
         echo "action-install-version=${INSTALL_VERSION}" >> $GITHUB_OUTPUT
 
+    - name: Install mamba Python ${{ matrix.python-version }}
+      if: ${{ matrix.installer == 'micromamba' }}
+      uses: mamba-org/provision-with-micromamba@main
+      with:
+        environment-file: False
+        environment-name: mda
+        extra-specs: |
+          python==${{ matrix.python-version }}
+          pip
+        channels: conda-forge
 
     - name: Install conda Python ${{ matrix.python-version }}
-      if: ${{ matrix.installer == 'conda' || matrix.installer == 'mamba' }}
+      if: ${{ matrix.installer == 'conda' }}
       uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: ${{ matrix.python-version }}
@@ -97,10 +123,10 @@ jobs:
 
     - name: Setup Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'pip' }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-      
+
     - id: Install
       uses: ./
       with:
@@ -108,7 +134,7 @@ jobs:
         install-tests: ${{ matrix.include-tests }}
         installer: ${{ matrix.installer }}
         shell: ${{ steps.environment-setup.outputs.action-shell }}
-    
+
     - name: Check version
       run: |
         case "${{ matrix.mdanalysis-version }}"  in 
@@ -132,44 +158,28 @@ jobs:
           fi
         fi
 
-  environment-config:
-    runs-on: ubuntu-latest
-    outputs:
-      stable-python-version: "${{ steps.get-python-version.outputs.python-version }}"
-    steps:
-      - uses: actions/checkout@v3
-
-      - id: get-python-version
-        uses: MDAnalysis/get-latest-python-version@main
-        with:
-          last-n-minor-release: 1
-
   test-on-preinstalled-conda:
-    needs: environment-config
+    needs: gen-python-matrix
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install conda ${{ needs.environment-config.outputs.stable-python-version }}
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install mamba Python ${{ needs.gen-python-matrix.outputs.stable-python }}
+        uses: mamba-org/provision-with-micromamba@main
         with:
-          python-version: ${{ needs.environment-config.outputs.stable-python-version }}
           environment-file: ./.github/test-environment.yaml
-          activate-environment: test
-          add-pip-as-python-dependency: true
-          architecture: x64
-          mamba-version: "*"
-          channels: conda-forge, defaults
-          auto-update-conda: true
-          show-channel-urls: true
-      
+          environment-name: mda
+          extra-specs: |
+            python==${{ needs.gen-python-matrix.outputs.stable-python }}
+            pip
+          channels: conda-forge
 
       - name: Install
         uses: ./
         with:
           version: ${{ env.MDANALYSIS_PREVIOUS_RELEASE }}
           install-tests: false
-          installer: mamba
+          installer: micromamba
           shell: bash -l {0}
         
       - name: Check version
@@ -181,15 +191,15 @@ jobs:
           fi
 
   test-on-preinstalled-pip:
-    needs: environment-config
+    needs: gen-python-matrix
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Python ${{ needs.environment-config.outputs.stable-python-version }}
+      - name: Setup Python ${{ needs.gen-python-matrix.outputs.stable-python }}
         uses: actions/setup-python@v3
         with:
-          python-version: ${{ needs.environment-config.outputs.stable-python-version }}
+          python-version: ${{ needs.gen-python-matrix.outputs.stable-python }}
 
       - name: Install MDAnalysis
         shell: bash
