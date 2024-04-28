@@ -111,7 +111,7 @@ jobs:
 
     - name: Install conda Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'conda' }}
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         python-version: ${{ matrix.python-version }}
         add-pip-as-python-dependency: true
