@@ -99,7 +99,7 @@ runs:
     - name: Install with conda
       if: steps.setup-installer.outputs.installer != 'pip'
       shell: ${{ inputs.shell }}
-      run: ${{ inputs.installer }} install -y -c conda-forge ${{ steps.setup-install-line.outputs.install-line }}
+      run: ${{ inputs.installer }} install -y -c conda-forge ${{ steps.setup-install-line.outputs.install-line }} 'numpy<2.0'
 
     - name: Install with pip
       if: steps.setup-installer.outputs.installer == 'pip'
