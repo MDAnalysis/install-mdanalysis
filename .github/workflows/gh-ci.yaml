@@ -26,9 +26,9 @@ defaults:
     shell: bash -l {0}
 
 env:
-  MDANALYSIS_DEVELOP_VERSION: "2.8.0-dev0"
-  MDANALYSIS_LATEST_RELEASE: "2.7.0"
-  MDANALYSIS_PREVIOUS_RELEASE: "2.6.1"
+  MDANALYSIS_DEVELOP_VERSION: "2.11.0-dev0"
+  MDANALYSIS_LATEST_RELEASE: "2.10.0"
+  MDANALYSIS_PREVIOUS_RELEASE: "2.9.0"
 
 jobs:
   gen-python-matrix:
@@ -39,7 +39,7 @@ jobs:
       oldest-python: ${{ steps.get-compatible-python.outputs.oldest-python }}
       stable-python: ${{ steps.get-compatible-python.outputs.stable-python }}
     steps:
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -78,7 +78,7 @@ jobs:
             mdanalysis-version: "latest"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
     - id: environment-setup
       run: |
@@ -123,7 +123,7 @@ jobs:
 
     - name: Setup Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'pip' }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -162,7 +162,7 @@ jobs:
     needs: gen-python-matrix
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Install mamba Python ${{ needs.gen-python-matrix.outputs.stable-python }}
         uses: mamba-org/provision-with-micromamba@main
@@ -194,10 +194,10 @@ jobs:
     needs: gen-python-matrix
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Setup Python ${{ needs.gen-python-matrix.outputs.stable-python }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ needs.gen-python-matrix.outputs.stable-python }}
 
