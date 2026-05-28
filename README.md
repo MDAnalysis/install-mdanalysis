@@ -39,7 +39,7 @@ steps:
 - uses: actions/checkout@v6
 
 - name: Install conda Python 3.11
-  uses: conda-incubator/setup-miniconda@v2
+  uses: conda-incubator/setup-miniconda@v4
   with:
   python-version: 3.11
   add-pip-as-python-dependency: true
