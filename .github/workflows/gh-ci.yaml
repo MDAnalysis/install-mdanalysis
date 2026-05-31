@@ -104,7 +104,7 @@ jobs:
       with:
         environment-name: mda
         create-args: |
-          python==${{ matrix.python-version }}
+          python=${{ matrix.python-version }}
           pip
 
     - name: Install conda Python ${{ matrix.python-version }}
@@ -163,14 +163,12 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install mamba Python ${{ needs.gen-python-matrix.outputs.stable-python }}
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v3
         with:
-          environment-file: ./.github/test-environment.yaml
           environment-name: mda
-          extra-specs: |
-            python==${{ needs.gen-python-matrix.outputs.stable-python }}
+          create-args: |
+            python=${{ needs.gen-python-matrix.outputs.stable-python }}
             pip
-          channels: conda-forge
 
       - name: Install
         uses: ./
