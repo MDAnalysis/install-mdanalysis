@@ -102,7 +102,6 @@ jobs:
       if: ${{ matrix.installer == 'micromamba' }}
       uses: mamba-org/setup-micromamba@v3
       with:
-        environment-file: false
         environment-name: mda
         create-args: |
           python==${{ matrix.python-version }}
