@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - id: get-compatible-python
         uses: MDAnalysis/mdanalysis-compatible-python@main
@@ -100,14 +100,13 @@ jobs:
 
     - name: Install mamba Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'micromamba' }}
-      uses: mamba-org/provision-with-micromamba@main
+      uses: mamba-org/setup-micromamba@v3
       with:
-        environment-file: False
+        environment-file: false
         environment-name: mda
-        extra-specs: |
+        create-args: |
           python==${{ matrix.python-version }}
           pip
-        channels: conda-forge
 
     - name: Install conda Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'conda' }}
