@@ -11,11 +11,11 @@ Examples:
 The below workflow installs the develop version of MDAnalysis and MDAnalysisTests, using pip.
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v6
 
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v6
   with:
-    python-version: 3.9
+    python-version: 3.11
 
 - uses: MDAnalysis/install-mdanalysis@main
   id: install-mdanalysis
@@ -36,12 +36,12 @@ Alternatively, you could use conda to install version 2.1.0:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v6
 
-- name: Install conda Python 3.9
-  uses: conda-incubator/setup-miniconda@v2
+- name: Install conda Python 3.11
+  uses: conda-incubator/setup-miniconda@v4
   with:
-  python-version: 3.9
+  python-version: 3.11
   add-pip-as-python-dependency: true
   architecture: x64
   mamba-version: "*"
@@ -52,7 +52,7 @@ steps:
 - uses: MDAnalysis/install-mdanalysis@main
   id: install-mdanalysis
   with:
-    version: "2.1.0"
+    version: "2.10.0"
     install-tests: true
     installer: conda  # or mamba
     shell: bash -l {0}
