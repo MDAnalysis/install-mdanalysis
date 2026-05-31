@@ -103,7 +103,7 @@ jobs:
       uses: mamba-org/setup-micromamba@v3
       with:
         environment-name: mda
-        create-args: |
+        create-args: >-
           python=${{ matrix.python-version }}
           pip
 
@@ -166,7 +166,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: mda
-          create-args: |
+          create-args: >-
             python=${{ needs.gen-python-matrix.outputs.stable-python }}
             pip
 
