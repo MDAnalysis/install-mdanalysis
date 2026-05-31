@@ -80,9 +80,9 @@ runs:
           _PACKAGE_SUFFIX="==${{ inputs.version }}"
         fi
         
-        _INSTALL_LINE="MDAnalysis${_PACKAGE_SUFFIX}"
+        _INSTALL_LINE="mdanalysis${_PACKAGE_SUFFIX}"
         if [[ "${{ inputs.install-tests }}" == "true" ]] ; then
-          _INSTALL_LINE="${_INSTALL_LINE} MDAnalysisTests${_PACKAGE_SUFFIX}"
+          _INSTALL_LINE="${_INSTALL_LINE} mdanalysistests${_PACKAGE_SUFFIX}"
         fi
 
         # special case develop
