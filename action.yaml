@@ -58,13 +58,14 @@ runs:
     - name: Uninstall pre-existing versions
       shell: ${{ inputs.shell }}
       run: |
-        # uninstall tests even if not reinstalling,
-        # as versions can clash
+        # uninstall tests even if not reinstalling, as versions can clash
         # we may need to continuously re-uninstall if there are multiple versions
         # also, match ^MDAnalysis with space, to avoid matching stuff like MDAnalysisData
-
-        conda remove --force mdanalysis --yes || true
-        conda remove --force mdanalysistests --yes || true
+        if [ "${{ inputs.installer }}" != "pip" ]; then
+          # clean-up a conda-based installation first
+          ${{ inputs.installer }} remove --force mdanalysis --yes || true
+          ${{ inputs.installer }} remove --force mdanalysistests --yes || true
+        fi
 
         while [[ $(python -m pip list | grep "^MDAnalysis ") ]] ; do
           python -m pip uninstall -y MDAnalysis MDAnalysisTests
