@@ -113,7 +113,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         add-pip-as-python-dependency: true
-        miniforge-version: latest
+        miniforge-version: "26.7.2-1"
         channels: conda-forge
         auto-update-conda: false
 
