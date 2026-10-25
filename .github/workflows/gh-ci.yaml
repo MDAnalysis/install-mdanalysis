@@ -39,7 +39,7 @@ jobs:
       oldest-python: ${{ steps.get-compatible-python.outputs.oldest-python }}
       stable-python: ${{ steps.get-compatible-python.outputs.stable-python }}
     steps:
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
@@ -78,7 +78,7 @@ jobs:
             mdanalysis-version: "latest"
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - id: environment-setup
       run: |
@@ -113,15 +113,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         add-pip-as-python-dependency: true
-        architecture: x64
-        mamba-version: "*"
-        channels: conda-forge, defaults
+        miniforge-version: latest
+        channels: conda-forge
         auto-update-conda: true
         show-channel-urls: true
 
     - name: Setup Python ${{ matrix.python-version }}
       if: ${{ matrix.installer == 'pip' }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -160,7 +159,7 @@ jobs:
     needs: gen-python-matrix
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install mamba Python ${{ needs.gen-python-matrix.outputs.stable-python }}
         uses: mamba-org/setup-micromamba@v3
@@ -190,7 +189,7 @@ jobs:
     needs: gen-python-matrix
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python ${{ needs.gen-python-matrix.outputs.stable-python }}
         uses: actions/setup-python@v6
