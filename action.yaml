@@ -70,6 +70,20 @@ runs:
           python -m pip uninstall -y MDAnalysis MDAnalysisTests
         done
 
+        # conda can leave behind partial dist-info directories when a pip
+        # install was overwritten by a conda install (e.g. pip-only files such
+        # as sboms/ in wheels from 2.11.0 on). These have no METADATA/RECORD,
+        # so pip can't uninstall them and fails on the next install.
+        python - <<'EOF'
+        import pathlib, shutil, sysconfig
+        for sp in {sysconfig.get_paths()[k] for k in ("purelib", "platlib")}:
+            for d in pathlib.Path(sp).glob("*.dist-info"):
+                name = d.name.split("-")[0].lower()
+                if name in ("mdanalysis", "mdanalysistests") and not (d / "METADATA").exists():
+                    print(f"Removing orphaned {d}")
+                    shutil.rmtree(d)
+        EOF
+
     - name: Setup install lines
       id: setup-install-line
       shell: ${{ inputs.shell }}
